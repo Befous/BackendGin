@@ -1,0 +1,51 @@
+package gcf
+
+import (
+	"net/http"
+	"time"
+
+	"github.com/Befous/BackendGin/controllers"
+	"github.com/Befous/BackendGin/models"
+	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+)
+
+func init() {
+	functions.HTTP("Befous", Befous)
+}
+
+func Befous(w http.ResponseWriter, r *http.Request) {
+	InitRoutes(w, r)
+}
+
+func InitRoutes(w http.ResponseWriter, r *http.Request) {
+	router := gin.New()
+	router.Use(gin.Logger())
+
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}
+	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE"}
+	config.AllowHeaders = []string{"Content-Type", "Authorization"}
+	config.MaxAge = 2 * time.Hour
+	router.Use(cors.New(config))
+
+	UserRoutes(router)
+
+	router.NoRoute(NoRoutes)
+
+	router.ServeHTTP(w, r)
+}
+
+func NoRoutes(c *gin.Context) {
+	c.JSON(http.StatusNotFound, models.Pesan{Status: false, Message: "Page not found"})
+}
+
+func UserRoutes(incomingRoutes *gin.Engine) {
+	incomingRoutes.GET("/TokenValue", controllers.TokenValue("publickey", "mongoenv", "befous", "users"))
+	incomingRoutes.GET("/Registrasi", controllers.Registrasi("publickey", "mongoenv", "befous", "users"))
+	incomingRoutes.GET("/Login", controllers.Login("privatekey", "mongoenv", "befous", "users"))
+	incomingRoutes.GET("/AmbilSemuaUser", controllers.AmbilSemuaUser("publickey", "mongoenv", "befous", "users"))
+	incomingRoutes.GET("/EditUser", controllers.EditUser("publickey", "mongoenv", "befous", "users"))
+	incomingRoutes.GET("/HapusUser", controllers.HapusUser("publickey", "mongoenv", "befous", "users"))
+}
