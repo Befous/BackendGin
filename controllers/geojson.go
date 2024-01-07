@@ -26,7 +26,7 @@ func MembuatGeojsonPoint(publickey, mongoenv, dbname, collname string) gin.Handl
 		role := c.GetString("role")
 		// Cek role
 		if role != "owner" {
-			if role != "owner" {
+			if role != "dosen" {
 				c.JSON(http.StatusUnauthorized, models.Pesan{Status: false, Message: "Anda tidak memiliki akses"})
 				c.Abort()
 				return
@@ -55,7 +55,7 @@ func MembuatGeojsonPolyline(publickey, mongoenv, dbname, collname string) gin.Ha
 		role := c.GetString("role")
 		// Cek role
 		if role != "owner" {
-			if role != "owner" {
+			if role != "dosen" {
 				c.JSON(http.StatusUnauthorized, models.Pesan{Status: false, Message: "Anda tidak memiliki akses"})
 				c.Abort()
 				return
@@ -84,7 +84,7 @@ func MembuatGeojsonPolygon(publickey, mongoenv, dbname, collname string) gin.Han
 		role := c.GetString("role")
 		// Cek role
 		if role != "owner" {
-			if role != "owner" {
+			if role != "dosen" {
 				c.JSON(http.StatusUnauthorized, models.Pesan{Status: false, Message: "Anda tidak memiliki akses"})
 				c.Abort()
 				return
@@ -93,6 +93,151 @@ func MembuatGeojsonPolygon(publickey, mongoenv, dbname, collname string) gin.Han
 		// Insert data user
 		utils.PostPolygon(mconn, collname, geojsonpolygon)
 		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: "Berhasil input data"})
+	}
+}
+
+func PostGeoIntersects(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		mconn := utils.SetConnection(mongoenv, dbname)
+		var coordinate models.Point
+		err := c.BindJSON(&coordinate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
+			return
+		}
+		// Authorization
+		middleware.Authorization(publickey)(c)
+		if c.IsAborted() {
+			return
+		}
+		role := c.GetString("role")
+		// Cek role
+		if role != "owner" {
+			if role != "dosen" {
+				c.JSON(http.StatusUnauthorized, models.Pesan{Status: false, Message: "Anda tidak memiliki akses"})
+				c.Abort()
+				return
+			}
+		}
+
+		geointersects := utils.GeoIntersects(mconn, collname, coordinate)
+		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: geointersects})
+	}
+}
+
+func PostGeoWithin(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		mconn := utils.SetConnection(mongoenv, dbname)
+		var coordinate models.Polygon
+		err := c.BindJSON(&coordinate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
+			return
+		}
+		// Authorization
+		middleware.Authorization(publickey)(c)
+		if c.IsAborted() {
+			return
+		}
+		role := c.GetString("role")
+		// Cek role
+		if role != "owner" {
+			if role != "dosen" {
+				c.JSON(http.StatusUnauthorized, models.Pesan{Status: false, Message: "Anda tidak memiliki akses"})
+				c.Abort()
+				return
+			}
+		}
+
+		geowithin := utils.GeoWithin(mconn, collname, coordinate)
+		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: geowithin})
+	}
+}
+
+func PostNear(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		mconn := utils.SetConnection(mongoenv, dbname)
+		var coordinate models.Point
+		err := c.BindJSON(&coordinate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
+			return
+		}
+		// Authorization
+		middleware.Authorization(publickey)(c)
+		if c.IsAborted() {
+			return
+		}
+		role := c.GetString("role")
+		// Cek role
+		if role != "owner" {
+			if role != "dosen" {
+				c.JSON(http.StatusUnauthorized, models.Pesan{Status: false, Message: "Anda tidak memiliki akses"})
+				c.Abort()
+				return
+			}
+		}
+
+		near := utils.Near(mconn, collname, coordinate)
+		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: near})
+	}
+}
+
+func PostNearSphere(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		mconn := utils.SetConnection(mongoenv, dbname)
+		var coordinate models.Point
+		err := c.BindJSON(&coordinate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
+			return
+		}
+		// Authorization
+		middleware.Authorization(publickey)(c)
+		if c.IsAborted() {
+			return
+		}
+		role := c.GetString("role")
+		// Cek role
+		if role != "owner" {
+			if role != "dosen" {
+				c.JSON(http.StatusUnauthorized, models.Pesan{Status: false, Message: "Anda tidak memiliki akses"})
+				c.Abort()
+				return
+			}
+		}
+
+		nearsphere := utils.NearSphere(mconn, collname, coordinate)
+		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: nearsphere})
+	}
+}
+
+func PostBox(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		mconn := utils.SetConnection(mongoenv, dbname)
+		var coordinate models.Polyline
+		err := c.BindJSON(&coordinate)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
+			return
+		}
+		// Authorization
+		middleware.Authorization(publickey)(c)
+		if c.IsAborted() {
+			return
+		}
+		role := c.GetString("role")
+		// Cek role
+		if role != "owner" {
+			if role != "dosen" {
+				c.JSON(http.StatusUnauthorized, models.Pesan{Status: false, Message: "Anda tidak memiliki akses"})
+				c.Abort()
+				return
+			}
+		}
+
+		box := utils.Box(mconn, collname, coordinate)
+		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: box})
 	}
 }
 
