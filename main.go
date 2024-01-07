@@ -15,6 +15,7 @@ func main() {
 	router.SetTrustedProxies([]string{"127.0.0.1"})
 
 	routes.UserRoutes(router)
+	routes.GeojsonRoutes(router)
 
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, models.Pesan{Status: false, Message: "Page not found"})

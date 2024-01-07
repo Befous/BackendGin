@@ -7,6 +7,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// Create
+
 func PostPoint(mconn *mongo.Database, collection string, pointdata models.GeoJsonPoint) interface{} {
 	return helpers.InsertOneDoc(mconn, collection, pointdata)
 }
@@ -23,15 +25,6 @@ func PostPolygon(mconn *mongo.Database, collection string, polygondata models.Ge
 
 func GetAllBangunan(mconn *mongo.Database, collname string) []models.GeoJson {
 	return helpers.GetAllDoc[[]models.GeoJson](mconn, collname)
-}
-
-// Update
-
-// Delete
-
-func DeleteGeojson(mconn *mongo.Database, collname string, userdata models.User) interface{} {
-	filter := bson.M{"username": userdata.Username}
-	return helpers.DeleteOneDoc(mconn, collname, filter)
 }
 
 func GeoIntersects(mconn *mongo.Database, collname string, coordinates models.Point) string {
@@ -52,4 +45,13 @@ func NearSphere(mconn *mongo.Database, collname string, coordinates models.Point
 
 func Box(mconn *mongo.Database, collname string, coordinates models.Polyline) string {
 	return helpers.GetBoxDoc(mconn, collname, coordinates)
+}
+
+// Update
+
+// Delete
+
+func DeleteGeojson(mconn *mongo.Database, collname string, userdata models.User) interface{} {
+	filter := bson.M{"username": userdata.Username}
+	return helpers.DeleteOneDoc(mconn, collname, filter)
 }

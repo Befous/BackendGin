@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/Befous/BackendGin/middleware"
 	"github.com/Befous/BackendGin/models"
 	"github.com/Befous/BackendGin/utils"
 	"github.com/gin-gonic/gin"
@@ -13,7 +14,7 @@ func TokenValue(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 		mconn := utils.SetConnection(mongoenv, dbname)
 		var response models.CredentialUser
 		// Authorization
-		utils.Authorization(publickey)(c)
+		middleware.Authorization(publickey)(c)
 		if c.IsAborted() {
 			return
 		}

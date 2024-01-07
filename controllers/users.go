@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/Befous/BackendGin/helpers"
+	"github.com/Befous/BackendGin/middleware"
 	"github.com/Befous/BackendGin/models"
 	"github.com/Befous/BackendGin/utils"
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,7 @@ func Registrasi(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 			return
 		}
 		// Authorization
-		utils.Authorization(publickey)(c)
+		middleware.Authorization(publickey)(c)
 		if c.IsAborted() {
 			return
 		}
@@ -91,7 +92,7 @@ func AmbilSemuaUser(publickey, mongoenv, dbname, collname string) gin.HandlerFun
 	return func(c *gin.Context) {
 		mconn := utils.SetConnection(mongoenv, dbname)
 		// Authorization
-		utils.Authorization(publickey)(c)
+		middleware.Authorization(publickey)(c)
 		if c.IsAborted() {
 			return
 		}
@@ -104,7 +105,7 @@ func AmbilSemuaUser(publickey, mongoenv, dbname, collname string) gin.HandlerFun
 		}
 		// Get data user
 		datauser := utils.GetAllUser(mconn, collname)
-		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: "success", Data: datauser})
+		c.JSON(http.StatusOK, datauser)
 	}
 }
 
@@ -118,7 +119,7 @@ func EditUser(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 			return
 		}
 		// Authorization
-		utils.Authorization(publickey)(c)
+		middleware.Authorization(publickey)(c)
 		if c.IsAborted() {
 			return
 		}
@@ -166,7 +167,7 @@ func HapusUser(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 			return
 		}
 		// Authorization
-		utils.Authorization(publickey)(c)
+		middleware.Authorization(publickey)(c)
 		if c.IsAborted() {
 			return
 		}
