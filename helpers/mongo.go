@@ -26,17 +26,38 @@ func Create2dsphere(mconn models.DBInfo) (db *mongo.Database) {
 		fmt.Printf("Error connecting to MongoDB: %v", err)
 	}
 
-	indexModel := mongo.IndexModel{
-		Keys: bson.D{
-			{Key: "geometry", Value: "2dsphere"},
-		},
-	}
-
-	_, err = client.Database(mconn.DBName).Collection(mconn.CollectionName).Indexes().CreateOne(context.TODO(), indexModel)
+	// Mengecek apakah indeks sudah ada
+	collection := client.Database(mconn.DBName).Collection(mconn.CollectionName)
+	cursor, err := collection.Indexes().List(context.TODO())
 	if err != nil {
-		fmt.Printf("Error creating geospatial index: %v", err)
+		fmt.Printf("Error listing indexes: %v", err)
 	}
 
+	indexExists := false
+	for cursor.Next(context.TODO()) {
+		var index bson.M
+		if err := cursor.Decode(&index); err != nil {
+			fmt.Printf("Error decoding index: %v", err)
+		}
+		if index["name"] == "geometry_2dsphere" {
+			indexExists = true
+			break
+		}
+	}
+
+	// Membuat indeks jika belum ada
+	if !indexExists {
+		indexModel := mongo.IndexModel{
+			Keys: bson.D{
+				{Key: "geometry", Value: "2dsphere"},
+			},
+		}
+
+		_, err = client.Database(mconn.DBName).Collection(mconn.CollectionName).Indexes().CreateOne(context.TODO(), indexModel)
+		if err != nil {
+			fmt.Printf("Error creating geospatial index: %v", err)
+		}
+	}
 	return client.Database(mconn.DBName)
 }
 

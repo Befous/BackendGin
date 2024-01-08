@@ -156,7 +156,7 @@ func PostGeoWithin(publickey, mongoenv, dbname, collname string) gin.HandlerFunc
 
 func PostNear(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		mconn := utils.SetConnection(mongoenv, dbname)
+		mconn := utils.SetConnection2dsphere(mongoenv, dbname, collname)
 		var coordinate models.Point
 		err := c.BindJSON(&coordinate)
 		if err != nil {
@@ -185,7 +185,7 @@ func PostNear(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 
 func PostNearSphere(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		mconn := utils.SetConnection(mongoenv, dbname)
+		mconn := utils.SetConnection2dsphere(mongoenv, dbname, collname)
 		var coordinate models.Point
 		err := c.BindJSON(&coordinate)
 		if err != nil {
