@@ -52,7 +52,7 @@ func Center(mconn *mongo.Database, collname string, coordinates models.Point) st
 }
 
 func CenterSphere(mconn *mongo.Database, collname string, coordinates models.Point) string {
-	return helpers.GetCenterDoc(mconn, collname, coordinates)
+	return helpers.GetCenterSphereDoc(mconn, collname, coordinates)
 }
 
 func MaxDistance(mconn *mongo.Database, collname string, coordinates models.Point) string {
