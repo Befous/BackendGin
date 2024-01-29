@@ -56,12 +56,14 @@ Package backend golang framework gin
 ## PostMaxDistance
 ```
 {
-    "coordinates": [103.6037314895799, -1.632582001101999]
+    "coordinates": [103.6037314895799, -1.632582001101999],
+    "max": 1000
 }
 ```
 ## PostMinDistance
 ```
 {
-    "coordinates": [103.6037314895799, -1.632582001101999]
+    "coordinates": [103.6037314895799, -1.632582001101999],
+    "min": 1
 }
 ```
