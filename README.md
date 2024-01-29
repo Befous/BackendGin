@@ -41,3 +41,27 @@ Package backend golang framework gin
     ]
 }
 ```
+## PostCenter
+```
+{
+    "coordinates": [103.62074450557095, -1.632735059500547]
+}
+```
+## PostCenterSphere
+```
+{
+    "coordinates": [103.62074450557095, -1.632735059500547]
+}
+```
+## PostMaxDistance
+```
+{
+    "coordinates": [103.6037314895799, -1.632582001101999]
+}
+```
+## PostMinDistance
+```
+{
+    "coordinates": [103.6037314895799, -1.632582001101999]
+}
+```
