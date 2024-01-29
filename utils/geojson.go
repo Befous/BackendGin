@@ -47,6 +47,22 @@ func Box(mconn *mongo.Database, collname string, coordinates models.Polyline) st
 	return helpers.GetBoxDoc(mconn, collname, coordinates)
 }
 
+func Center(mconn *mongo.Database, collname string, coordinates models.Point) string {
+	return helpers.GetCenterDoc(mconn, collname, coordinates)
+}
+
+func CenterSphere(mconn *mongo.Database, collname string, coordinates models.Point) string {
+	return helpers.GetCenterDoc(mconn, collname, coordinates)
+}
+
+func MaxDistance(mconn *mongo.Database, collname string, coordinates models.Point) string {
+	return helpers.GetMaxDistanceDoc(mconn, collname, coordinates)
+}
+
+func MinDistance(mconn *mongo.Database, collname string, coordinates models.Point) string {
+	return helpers.GetMinDistanceDoc(mconn, collname, coordinates)
+}
+
 // Update
 
 // Delete
