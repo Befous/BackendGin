@@ -3,6 +3,7 @@ package helpers
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/Befous/BackendGin/models"
@@ -183,7 +184,7 @@ func GetGeoIntersectsDoc(db *mongo.Database, collname string, geospatial models.
 	var docs []models.FullGeoJson
 	cur, err := db.Collection(collname).Find(context.TODO(), filter)
 	if err != nil {
-		fmt.Printf("Near: %v\n", err)
+		fmt.Printf("Geo Intersects: %v\n", err)
 		return ""
 	}
 
@@ -213,7 +214,7 @@ func GetGeoIntersectsDoc(db *mongo.Database, collname string, geospatial models.
 	// Gabungkan nilai-nilai dengan koma
 	result = strings.Join(names, ", ")
 
-	return result
+	return "Geojson yang bersinggungan dengan koordinat anda adalah: " + result
 }
 
 func GetGeoWithinDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
@@ -231,7 +232,7 @@ func GetGeoWithinDoc(db *mongo.Database, collname string, geospatial models.Geos
 	var docs []models.FullGeoJson
 	cur, err := db.Collection(collname).Find(context.TODO(), filter)
 	if err != nil {
-		fmt.Printf("Near: %v\n", err)
+		fmt.Printf("GeoWithin: %v\n", err)
 		return ""
 	}
 
@@ -261,7 +262,7 @@ func GetGeoWithinDoc(db *mongo.Database, collname string, geospatial models.Geos
 	// Gabungkan nilai-nilai dengan koma
 	result = strings.Join(names, ", ")
 
-	return result
+	return "Geojson yang berada di dalam koordinat anda adalah: " + result
 }
 
 func GetNearDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
@@ -311,7 +312,7 @@ func GetNearDoc(db *mongo.Database, collname string, geospatial models.Geospatia
 	// Gabungkan nilai-nilai dengan koma
 	result = strings.Join(names, ", ")
 
-	return result
+	return "Geojson yang berdekatan dengan koordinat anda adalah: " + result
 }
 
 func GetNearSphereDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
@@ -361,7 +362,7 @@ func GetNearSphereDoc(db *mongo.Database, collname string, geospatial models.Geo
 	// Gabungkan nilai-nilai dengan koma
 	result = strings.Join(names, ", ")
 
-	return result
+	return "Geojson yang berdekatan dengan koordinat anda adalah: " + result
 }
 
 func GetBoxDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
@@ -406,7 +407,7 @@ func GetBoxDoc(db *mongo.Database, collname string, geospatial models.Geospatial
 	// Gabungkan nilai-nilai dengan koma
 	result = strings.Join(names, ", ")
 
-	return result
+	return "Geojson yang berada di dalam box anda adalah: " + result
 }
 
 func GetCenterDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
@@ -451,7 +452,7 @@ func GetCenterDoc(db *mongo.Database, collname string, geospatial models.Geospat
 	// Gabungkan nilai-nilai dengan koma
 	result = strings.Join(names, ", ")
 
-	return result
+	return "Geojson yang berada di dalam lingkaran dengan radius " + strconv.FormatFloat(geospatial.Radius, 'f', -1, 64) + " adalah: " + result
 }
 
 func GetCenterSphereDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
@@ -496,5 +497,5 @@ func GetCenterSphereDoc(db *mongo.Database, collname string, geospatial models.G
 	// Gabungkan nilai-nilai dengan koma
 	result = strings.Join(names, ", ")
 
-	return result
+	return "Geojson yang berada di dalam lingkaran dengan radius " + strconv.FormatFloat(geospatial.Radius, 'f', -1, 64) + " adalah: " + result
 }
