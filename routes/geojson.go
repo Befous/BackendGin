@@ -16,7 +16,5 @@ func GeojsonRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("/PostBox", controllers.PostBox("publickey", "mongoenv", "befous", "geojson"))
 	incomingRoutes.POST("/PostCenter", controllers.PostCenter("publickey", "mongoenv", "befous", "geojson"))
 	incomingRoutes.POST("/PostCenterSphere", controllers.PostCenterSphere("publickey", "mongoenv", "befous", "geojson"))
-	incomingRoutes.POST("/PostMaxDistance", controllers.PostMaxDistance("publickey", "mongoenv", "befous", "geojson"))
-	incomingRoutes.POST("/PostMinDistance", controllers.PostMinDistance("publickey", "mongoenv", "befous", "geojson"))
 	incomingRoutes.GET("/AmbilDataGeojson", controllers.AmbilDataGeojson("mongoenv", "befous", "geojson"))
 }

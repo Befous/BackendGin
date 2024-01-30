@@ -299,64 +299,6 @@ func PostCenterSphere(publickey, mongoenv, dbname, collname string) gin.HandlerF
 	}
 }
 
-func PostMaxDistance(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		mconn := utils.SetConnection(mongoenv, dbname)
-		var coordinate models.Point
-		err := c.BindJSON(&coordinate)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
-			return
-		}
-		// Authorization
-		middleware.Authorization(publickey)(c)
-		if c.IsAborted() {
-			return
-		}
-		role := c.GetString("role")
-		// Cek role
-		if role != "owner" {
-			if role != "dosen" {
-				c.JSON(http.StatusUnauthorized, models.Pesan{Status: false, Message: "Anda tidak memiliki akses"})
-				c.Abort()
-				return
-			}
-		}
-
-		box := utils.MaxDistance(mconn, collname, coordinate)
-		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: box})
-	}
-}
-
-func PostMinDistance(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		mconn := utils.SetConnection(mongoenv, dbname)
-		var coordinate models.Point
-		err := c.BindJSON(&coordinate)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
-			return
-		}
-		// Authorization
-		middleware.Authorization(publickey)(c)
-		if c.IsAborted() {
-			return
-		}
-		role := c.GetString("role")
-		// Cek role
-		if role != "owner" {
-			if role != "dosen" {
-				c.JSON(http.StatusUnauthorized, models.Pesan{Status: false, Message: "Anda tidak memiliki akses"})
-				c.Abort()
-				return
-			}
-		}
-
-		box := utils.MinDistance(mconn, collname, coordinate)
-		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: box})
-	}
-}
-
 func AmbilDataGeojson(mongoenv, dbname, collname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mconn := utils.SetConnection(mongoenv, dbname)

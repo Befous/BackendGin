@@ -55,14 +55,6 @@ func CenterSphere(mconn *mongo.Database, collname string, coordinates models.Poi
 	return helpers.GetCenterSphereDoc(mconn, collname, coordinates)
 }
 
-func MaxDistance(mconn *mongo.Database, collname string, coordinates models.Point) string {
-	return helpers.GetMaxDistanceDoc(mconn, collname, coordinates)
-}
-
-func MinDistance(mconn *mongo.Database, collname string, coordinates models.Point) string {
-	return helpers.GetMinDistanceDoc(mconn, collname, coordinates)
-}
-
 // Update
 
 // Delete

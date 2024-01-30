@@ -214,7 +214,8 @@ func GetNearDoc(db *mongo.Database, collname string, coordinates models.Point) (
 					"type":        "Point",
 					"coordinates": coordinates.Coordinates,
 				},
-				"$maxDistance": 1000,
+				"$maxDistance": coordinates.Max,
+				"$minDistance": coordinates.Min,
 			},
 		},
 	}
@@ -379,59 +380,4 @@ func GetCenterSphereDoc(db *mongo.Database, collname string, coordinates models.
 	result = strings.Join(names, ", ")
 
 	return result
-}
-
-// func GetGeometryDoc(db *mongo.Database, collname, tipe string, coordinates models.Point) (result string) {
-// 	filter := bson.M{
-// 		"$geometry": bson.M{
-// 			"type":        tipe,
-// 			"coordinates": []interface{}{coordinates},
-// 		},
-// 	}
-// 	var doc models.FullGeoJson
-// 	err := db.Collection(collname).FindOne(context.TODO(), filter).Decode(&doc)
-// 	if err != nil {
-// 		fmt.Printf("NearSphere: %v\n", err)
-// 	}
-// 	return doc.Properties.Name
-// }
-
-func GetMaxDistanceDoc(db *mongo.Database, collname string, coordinates models.Point) (result string) {
-	filter := bson.M{
-		"geometry": bson.M{
-			"$near": bson.M{
-				"$geometry": bson.M{
-					"type":        "Point",
-					"coordinates": coordinates.Coordinates,
-				},
-				"$maxDistance": coordinates.Max,
-			},
-		},
-	}
-	var doc models.FullGeoJson
-	err := db.Collection(collname).FindOne(context.TODO(), filter).Decode(&doc)
-	if err != nil {
-		fmt.Printf("Near: %v\n", err)
-	}
-	return "Koordinat anda dekat dengan " + doc.Properties.Name
-}
-
-func GetMinDistanceDoc(db *mongo.Database, collname string, coordinates models.Point) (result string) {
-	filter := bson.M{
-		"geometry": bson.M{
-			"$near": bson.M{
-				"$geometry": bson.M{
-					"type":        "Point",
-					"coordinates": coordinates.Coordinates,
-				},
-				"$minDistance": coordinates.Min,
-			},
-		},
-	}
-	var doc models.FullGeoJson
-	err := db.Collection(collname).FindOne(context.TODO(), filter).Decode(&doc)
-	if err != nil {
-		fmt.Printf("Near: %v\n", err)
-	}
-	return "Koordinat anda dekat dengan " + doc.Properties.Name
 }
