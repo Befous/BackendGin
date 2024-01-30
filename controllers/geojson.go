@@ -99,8 +99,8 @@ func MembuatGeojsonPolygon(publickey, mongoenv, dbname, collname string) gin.Han
 func PostGeoIntersects(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mconn := utils.SetConnection(mongoenv, dbname)
-		var coordinate models.Point
-		err := c.BindJSON(&coordinate)
+		var geospatial models.Geospatial
+		err := c.BindJSON(&geospatial)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
 			return
@@ -120,7 +120,7 @@ func PostGeoIntersects(publickey, mongoenv, dbname, collname string) gin.Handler
 			}
 		}
 
-		geointersects := utils.GeoIntersects(mconn, collname, coordinate)
+		geointersects := utils.GeoIntersects(mconn, collname, geospatial)
 		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: geointersects})
 	}
 }
@@ -128,8 +128,8 @@ func PostGeoIntersects(publickey, mongoenv, dbname, collname string) gin.Handler
 func PostGeoWithin(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mconn := utils.SetConnection(mongoenv, dbname)
-		var coordinate models.Polygon
-		err := c.BindJSON(&coordinate)
+		var geospatial models.Geospatial
+		err := c.BindJSON(&geospatial)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
 			return
@@ -149,7 +149,7 @@ func PostGeoWithin(publickey, mongoenv, dbname, collname string) gin.HandlerFunc
 			}
 		}
 
-		geowithin := utils.GeoWithin(mconn, collname, coordinate)
+		geowithin := utils.GeoWithin(mconn, collname, geospatial)
 		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: geowithin})
 	}
 }
@@ -157,8 +157,8 @@ func PostGeoWithin(publickey, mongoenv, dbname, collname string) gin.HandlerFunc
 func PostNear(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mconn := utils.SetConnection2dsphere(mongoenv, dbname, collname)
-		var coordinate models.Point
-		err := c.BindJSON(&coordinate)
+		var geospatial models.Geospatial
+		err := c.BindJSON(&geospatial)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
 			return
@@ -178,7 +178,7 @@ func PostNear(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 			}
 		}
 
-		near := utils.Near(mconn, collname, coordinate)
+		near := utils.Near(mconn, collname, geospatial)
 		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: near})
 	}
 }
@@ -186,8 +186,8 @@ func PostNear(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 func PostNearSphere(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mconn := utils.SetConnection2dsphere(mongoenv, dbname, collname)
-		var coordinate models.Point
-		err := c.BindJSON(&coordinate)
+		var geospatial models.Geospatial
+		err := c.BindJSON(&geospatial)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
 			return
@@ -207,7 +207,7 @@ func PostNearSphere(publickey, mongoenv, dbname, collname string) gin.HandlerFun
 			}
 		}
 
-		nearsphere := utils.NearSphere(mconn, collname, coordinate)
+		nearsphere := utils.NearSphere(mconn, collname, geospatial)
 		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: nearsphere})
 	}
 }
@@ -215,8 +215,8 @@ func PostNearSphere(publickey, mongoenv, dbname, collname string) gin.HandlerFun
 func PostBox(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mconn := utils.SetConnection(mongoenv, dbname)
-		var coordinate models.Polyline
-		err := c.BindJSON(&coordinate)
+		var geospatial models.Geospatial
+		err := c.BindJSON(&geospatial)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
 			return
@@ -236,7 +236,7 @@ func PostBox(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 			}
 		}
 
-		box := utils.Box(mconn, collname, coordinate)
+		box := utils.Box(mconn, collname, geospatial)
 		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: box})
 	}
 }
@@ -244,8 +244,8 @@ func PostBox(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 func PostCenter(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mconn := utils.SetConnection(mongoenv, dbname)
-		var coordinate models.Point
-		err := c.BindJSON(&coordinate)
+		var geospatial models.Geospatial
+		err := c.BindJSON(&geospatial)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
 			return
@@ -265,7 +265,7 @@ func PostCenter(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 			}
 		}
 
-		box := utils.Center(mconn, collname, coordinate)
+		box := utils.Center(mconn, collname, geospatial)
 		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: box})
 	}
 }
@@ -273,8 +273,8 @@ func PostCenter(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 func PostCenterSphere(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mconn := utils.SetConnection(mongoenv, dbname)
-		var coordinate models.Point
-		err := c.BindJSON(&coordinate)
+		var geospatial models.Geospatial
+		err := c.BindJSON(&geospatial)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
 			return
@@ -294,7 +294,7 @@ func PostCenterSphere(publickey, mongoenv, dbname, collname string) gin.HandlerF
 			}
 		}
 
-		box := utils.CenterSphere(mconn, collname, coordinate)
+		box := utils.CenterSphere(mconn, collname, geospatial)
 		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: box})
 	}
 }

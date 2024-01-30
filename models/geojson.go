@@ -26,8 +26,6 @@ type FullGeoJson struct {
 
 type Point struct {
 	Coordinates []float64 `json:"coordinates" bson:"coordinates"`
-	Max         float64   `json:"max,omitempty" bson:"max,omitempty"`
-	Min         float64   `json:"min,omitempty" bson:"min,omitempty"`
 }
 
 type Polyline struct {
@@ -63,4 +61,12 @@ type GeoJsonPolygon struct {
 		Coordinates [][][]float64 `json:"coordinates" bson:"coordinates"`
 		Type        string        `json:"type,omitempty" bson:"type,omitempty"`
 	} `json:"geometry" bson:"geometry"`
+}
+
+type Geospatial struct {
+	Type        string      `json:"type" bson:"type"`
+	Coordinates interface{} `json:"coordinates" bson:"coordinates"`
+	Max         float64     `json:"max,omitempty" bson:"max,omitempty"`
+	Min         float64     `json:"min,omitempty" bson:"min,omitempty"`
+	Radius      float64     `json:"radius,omitempty" bson:"radius,omitempty"`
 }

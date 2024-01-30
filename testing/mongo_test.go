@@ -11,12 +11,12 @@ import (
 
 func TestEncode(t *testing.T) {
 	mconn := utils.SetConnection("mongoenv", "befous")
-	coordinates := models.Point{
+	geospatial := models.Geospatial{
 		Coordinates: []float64{
 			103.62074450557095, -1.632735059500547,
 		},
 	}
 
-	test := helpers.GetCenterDoc(mconn, "geojson", coordinates)
+	test := helpers.GetCenterDoc(mconn, "geojson", geospatial)
 	fmt.Println(test)
 }

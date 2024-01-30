@@ -27,32 +27,32 @@ func GetAllBangunan(mconn *mongo.Database, collname string) []models.GeoJson {
 	return helpers.GetAllDoc[[]models.GeoJson](mconn, collname)
 }
 
-func GeoIntersects(mconn *mongo.Database, collname string, coordinates models.Point) string {
-	return helpers.GetGeoIntersectsDoc(mconn, collname, coordinates)
+func GeoIntersects(mconn *mongo.Database, collname string, geospatial models.Geospatial) string {
+	return helpers.GetGeoIntersectsDoc(mconn, collname, geospatial)
 }
 
-func GeoWithin(mconn *mongo.Database, collname string, coordinates models.Polygon) string {
-	return helpers.GetGeoWithinDoc(mconn, collname, coordinates)
+func GeoWithin(mconn *mongo.Database, collname string, geospatial models.Geospatial) string {
+	return helpers.GetGeoWithinDoc(mconn, collname, geospatial)
 }
 
-func Near(mconn *mongo.Database, collname string, coordinates models.Point) string {
-	return helpers.GetNearDoc(mconn, collname, coordinates)
+func Near(mconn *mongo.Database, collname string, geospatial models.Geospatial) string {
+	return helpers.GetNearDoc(mconn, collname, geospatial)
 }
 
-func NearSphere(mconn *mongo.Database, collname string, coordinates models.Point) string {
-	return helpers.GetNearSphereDoc(mconn, collname, coordinates)
+func NearSphere(mconn *mongo.Database, collname string, geospatial models.Geospatial) string {
+	return helpers.GetNearSphereDoc(mconn, collname, geospatial)
 }
 
-func Box(mconn *mongo.Database, collname string, coordinates models.Polyline) string {
-	return helpers.GetBoxDoc(mconn, collname, coordinates)
+func Box(mconn *mongo.Database, collname string, geospatial models.Geospatial) string {
+	return helpers.GetBoxDoc(mconn, collname, geospatial)
 }
 
-func Center(mconn *mongo.Database, collname string, coordinates models.Point) string {
-	return helpers.GetCenterDoc(mconn, collname, coordinates)
+func Center(mconn *mongo.Database, collname string, geospatial models.Geospatial) string {
+	return helpers.GetCenterDoc(mconn, collname, geospatial)
 }
 
-func CenterSphere(mconn *mongo.Database, collname string, coordinates models.Point) string {
-	return helpers.GetCenterSphereDoc(mconn, collname, coordinates)
+func CenterSphere(mconn *mongo.Database, collname string, geospatial models.Geospatial) string {
+	return helpers.GetCenterSphereDoc(mconn, collname, geospatial)
 }
 
 // Update

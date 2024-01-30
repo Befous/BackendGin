@@ -168,54 +168,14 @@ func DocExists[T any](db *mongo.Database, collname string, filter bson.M, doc T)
 	return err == nil
 }
 
-func GetGeoIntersectsDoc(db *mongo.Database, collname string, coordinates models.Point) (result string) {
+func GetGeoIntersectsDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
 	filter := bson.M{
 		"geometry": bson.M{
 			"$geoIntersects": bson.M{
 				"$geometry": bson.M{
-					"type":        "Point",
-					"coordinates": coordinates.Coordinates,
+					"type":        geospatial.Type,
+					"coordinates": geospatial.Coordinates,
 				},
-			},
-		},
-	}
-	var doc models.FullGeoJson
-	err := db.Collection(collname).FindOne(context.TODO(), filter).Decode(&doc)
-	if err != nil {
-		fmt.Printf("GeoIntersects: %v\n", err)
-	}
-	return "Koordinat anda bersinggungan dengan " + doc.Properties.Name
-}
-
-func GetGeoWithinDoc(db *mongo.Database, collname string, coordinates models.Polygon) (result string) {
-	filter := bson.M{
-		"geometry": bson.M{
-			"$geoWithin": bson.M{
-				"$geometry": bson.M{
-					"type":        "Polygon",
-					"coordinates": coordinates.Coordinates,
-				},
-			},
-		},
-	}
-	var doc models.FullGeoJson
-	err := db.Collection(collname).FindOne(context.TODO(), filter).Decode(&doc)
-	if err != nil {
-		fmt.Printf("GeoWithin: %v\n", err)
-	}
-	return "Koordinat anda berada di " + doc.Properties.Name
-}
-
-func GetNearDoc(db *mongo.Database, collname string, coordinates models.Point) (result string) {
-	filter := bson.M{
-		"geometry": bson.M{
-			"$near": bson.M{
-				"$geometry": bson.M{
-					"type":        "Point",
-					"coordinates": coordinates.Coordinates,
-				},
-				"$maxDistance": coordinates.Max,
-				"$minDistance": coordinates.Min,
 			},
 		},
 	}
@@ -256,16 +216,114 @@ func GetNearDoc(db *mongo.Database, collname string, coordinates models.Point) (
 	return result
 }
 
-func GetNearSphereDoc(db *mongo.Database, collname string, coordinates models.Point) (result string) {
+func GetGeoWithinDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
+	filter := bson.M{
+		"geometry": bson.M{
+			"$geoWithin": bson.M{
+				"$geometry": bson.M{
+					"type":        geospatial.Type,
+					"coordinates": geospatial.Coordinates,
+				},
+			},
+		},
+	}
+
+	var docs []models.FullGeoJson
+	cur, err := db.Collection(collname).Find(context.TODO(), filter)
+	if err != nil {
+		fmt.Printf("Near: %v\n", err)
+		return ""
+	}
+
+	defer cur.Close(context.TODO())
+
+	for cur.Next(context.TODO()) {
+		var doc models.FullGeoJson
+		err := cur.Decode(&doc)
+		if err != nil {
+			fmt.Printf("Decode Err: %v\n", err)
+			continue
+		}
+		docs = append(docs, doc)
+	}
+
+	if err := cur.Err(); err != nil {
+		fmt.Printf("Cursor Err: %v\n", err)
+		return ""
+	}
+
+	// Ambil nilai properti Name dari setiap dokumen
+	var names []string
+	for _, doc := range docs {
+		names = append(names, doc.Properties.Name)
+	}
+
+	// Gabungkan nilai-nilai dengan koma
+	result = strings.Join(names, ", ")
+
+	return result
+}
+
+func GetNearDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
+	filter := bson.M{
+		"geometry": bson.M{
+			"$near": bson.M{
+				"$geometry": bson.M{
+					"type":        geospatial.Type,
+					"coordinates": geospatial.Coordinates,
+				},
+				"$maxDistance": geospatial.Max,
+				"$minDistance": geospatial.Min,
+			},
+		},
+	}
+
+	var docs []models.FullGeoJson
+	cur, err := db.Collection(collname).Find(context.TODO(), filter)
+	if err != nil {
+		fmt.Printf("Near: %v\n", err)
+		return ""
+	}
+
+	defer cur.Close(context.TODO())
+
+	for cur.Next(context.TODO()) {
+		var doc models.FullGeoJson
+		err := cur.Decode(&doc)
+		if err != nil {
+			fmt.Printf("Decode Err: %v\n", err)
+			continue
+		}
+		docs = append(docs, doc)
+	}
+
+	if err := cur.Err(); err != nil {
+		fmt.Printf("Cursor Err: %v\n", err)
+		return ""
+	}
+
+	// Ambil nilai properti Name dari setiap dokumen
+	var names []string
+	for _, doc := range docs {
+		names = append(names, doc.Properties.Name)
+	}
+
+	// Gabungkan nilai-nilai dengan koma
+	result = strings.Join(names, ", ")
+
+	return result
+}
+
+func GetNearSphereDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
 	filter := bson.M{
 		"geometry": bson.M{
 			"$nearSphere": bson.M{
 				"$geometry": bson.M{
-					"type":        "Point",
-					"coordinates": coordinates.Coordinates,
+					"type":        geospatial.Type,
+					"coordinates": geospatial.Coordinates,
 				},
-				"$maxDistance": coordinates.Max,
-				"$minDistance": coordinates.Min,
+				"$maxDistance": geospatial.Max,
+				"$minDistance": geospatial.Min,
 			},
 		},
 	}
@@ -306,11 +364,11 @@ func GetNearSphereDoc(db *mongo.Database, collname string, coordinates models.Po
 	return result
 }
 
-func GetBoxDoc(db *mongo.Database, collname string, coordinates models.Polyline) (result string) {
+func GetBoxDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
 	filter := bson.M{
 		"geometry": bson.M{
 			"$geoWithin": bson.M{
-				"$box": coordinates.Coordinates,
+				"$box": geospatial.Coordinates,
 			},
 		},
 	}
@@ -351,11 +409,11 @@ func GetBoxDoc(db *mongo.Database, collname string, coordinates models.Polyline)
 	return result
 }
 
-func GetCenterDoc(db *mongo.Database, collname string, coordinates models.Point) (result string) {
+func GetCenterDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
 	filter := bson.M{
 		"geometry": bson.M{
 			"$geoWithin": bson.M{
-				"$center": []interface{}{coordinates.Coordinates, 0.003},
+				"$center": []interface{}{geospatial.Coordinates, geospatial.Radius},
 			},
 		},
 	}
@@ -396,11 +454,11 @@ func GetCenterDoc(db *mongo.Database, collname string, coordinates models.Point)
 	return result
 }
 
-func GetCenterSphereDoc(db *mongo.Database, collname string, coordinates models.Point) (result string) {
+func GetCenterSphereDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
 	filter := bson.M{
 		"geometry": bson.M{
 			"$geoWithin": bson.M{
-				"$centerSphere": []interface{}{coordinates.Coordinates, 0.00003},
+				"$centerSphere": []interface{}{geospatial.Coordinates, geospatial.Radius},
 			},
 		},
 	}
