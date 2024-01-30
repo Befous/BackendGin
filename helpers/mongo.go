@@ -219,12 +219,41 @@ func GetNearDoc(db *mongo.Database, collname string, coordinates models.Point) (
 			},
 		},
 	}
-	var doc models.FullGeoJson
-	err := db.Collection(collname).FindOne(context.TODO(), filter).Decode(&doc)
+
+	var docs []models.FullGeoJson
+	cur, err := db.Collection(collname).Find(context.TODO(), filter)
 	if err != nil {
 		fmt.Printf("Near: %v\n", err)
+		return ""
 	}
-	return "Koordinat anda dekat dengan " + doc.Properties.Name
+
+	defer cur.Close(context.TODO())
+
+	for cur.Next(context.TODO()) {
+		var doc models.FullGeoJson
+		err := cur.Decode(&doc)
+		if err != nil {
+			fmt.Printf("Decode Err: %v\n", err)
+			continue
+		}
+		docs = append(docs, doc)
+	}
+
+	if err := cur.Err(); err != nil {
+		fmt.Printf("Cursor Err: %v\n", err)
+		return ""
+	}
+
+	// Ambil nilai properti Name dari setiap dokumen
+	var names []string
+	for _, doc := range docs {
+		names = append(names, doc.Properties.Name)
+	}
+
+	// Gabungkan nilai-nilai dengan koma
+	result = strings.Join(names, ", ")
+
+	return result
 }
 
 func GetNearSphereDoc(db *mongo.Database, collname string, coordinates models.Point) (result string) {
@@ -235,16 +264,46 @@ func GetNearSphereDoc(db *mongo.Database, collname string, coordinates models.Po
 					"type":        "Point",
 					"coordinates": coordinates.Coordinates,
 				},
-				"$maxDistance": 1000,
+				"$maxDistance": coordinates.Max,
+				"$minDistance": coordinates.Min,
 			},
 		},
 	}
-	var doc models.FullGeoJson
-	err := db.Collection(collname).FindOne(context.TODO(), filter).Decode(&doc)
+
+	var docs []models.FullGeoJson
+	cur, err := db.Collection(collname).Find(context.TODO(), filter)
 	if err != nil {
-		fmt.Printf("NearSphere: %v\n", err)
+		fmt.Printf("Near Sphere: %v\n", err)
+		return ""
 	}
-	return "Koordinat anda dekat dengan " + doc.Properties.Name
+
+	defer cur.Close(context.TODO())
+
+	for cur.Next(context.TODO()) {
+		var doc models.FullGeoJson
+		err := cur.Decode(&doc)
+		if err != nil {
+			fmt.Printf("Decode Err: %v\n", err)
+			continue
+		}
+		docs = append(docs, doc)
+	}
+
+	if err := cur.Err(); err != nil {
+		fmt.Printf("Cursor Err: %v\n", err)
+		return ""
+	}
+
+	// Ambil nilai properti Name dari setiap dokumen
+	var names []string
+	for _, doc := range docs {
+		names = append(names, doc.Properties.Name)
+	}
+
+	// Gabungkan nilai-nilai dengan koma
+	result = strings.Join(names, ", ")
+
+	return result
 }
 
 func GetBoxDoc(db *mongo.Database, collname string, coordinates models.Polyline) (result string) {
@@ -304,7 +363,7 @@ func GetCenterDoc(db *mongo.Database, collname string, coordinates models.Point)
 	var docs []models.FullGeoJson
 	cur, err := db.Collection(collname).Find(context.TODO(), filter)
 	if err != nil {
-		fmt.Printf("Box: %v\n", err)
+		fmt.Printf("Center: %v\n", err)
 		return ""
 	}
 
@@ -349,7 +408,7 @@ func GetCenterSphereDoc(db *mongo.Database, collname string, coordinates models.
 	var docs []models.FullGeoJson
 	cur, err := db.Collection(collname).Find(context.TODO(), filter)
 	if err != nil {
-		fmt.Printf("Box: %v\n", err)
+		fmt.Printf("Center Sphere: %v\n", err)
 		return ""
 	}
 
