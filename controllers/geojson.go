@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Befous/BackendGin/middleware"
 	"github.com/Befous/BackendGin/models"
@@ -120,8 +121,17 @@ func PostGeoIntersects(publickey, mongoenv, dbname, collname string) gin.Handler
 			}
 		}
 
-		geointersects := utils.GeoIntersects(mconn, collname, geospatial)
-		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: geointersects})
+		geointersects, err := utils.GeoIntersects(mconn, collname, geospatial)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetGeoIntersectsDoc: " + err.Error()})
+			return
+		}
+		result := utils.GeojsonNameString(geointersects)
+		if result == "" {
+			c.JSON(http.StatusOK, models.Pesan{Status: true, Empty: true, Message: "Tidak ada geojson yang bersinggungan dengan koordinat anda"})
+			return
+		}
+		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: "Geojson yang bersinggungan dengan koordinat anda adalah: " + result})
 	}
 }
 
@@ -149,8 +159,17 @@ func PostGeoWithin(publickey, mongoenv, dbname, collname string) gin.HandlerFunc
 			}
 		}
 
-		geowithin := utils.GeoWithin(mconn, collname, geospatial)
-		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: geowithin})
+		geowithin, err := utils.GeoWithin(mconn, collname, geospatial)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetGeoWithinDoc: " + err.Error()})
+			return
+		}
+		result := utils.GeojsonNameString(geowithin)
+		if result == "" {
+			c.JSON(http.StatusOK, models.Pesan{Status: true, Empty: true, Message: "Tidak ada geojson yang berada dengan koordinat anda"})
+			return
+		}
+		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: "Geojson yang berada di dalam koordinat anda adalah: " + result})
 	}
 }
 
@@ -178,8 +197,17 @@ func PostNear(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 			}
 		}
 
-		near := utils.Near(mconn, collname, geospatial)
-		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: near})
+		near, err := utils.Near(mconn, collname, geospatial)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetNearDoc: " + err.Error()})
+			return
+		}
+		result := utils.GeojsonNameString(near)
+		if result == "" {
+			c.JSON(http.StatusOK, models.Pesan{Status: true, Empty: true, Message: "Tidak terdapat geojson yang berdekatan pada koordinat anda dengan max distance " + strconv.FormatFloat(geospatial.Max, 'f', -1, 64) + " meter dan min distance " + strconv.FormatFloat(geospatial.Min, 'f', -1, 64) + " meter"})
+			return
+		}
+		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: "Geojson yang berdekatan pada koordinat anda dengan max distance " + strconv.FormatFloat(geospatial.Max, 'f', -1, 64) + " meter dan min distance " + strconv.FormatFloat(geospatial.Min, 'f', -1, 64) + " meter adalah: " + result})
 	}
 }
 
@@ -207,8 +235,17 @@ func PostNearSphere(publickey, mongoenv, dbname, collname string) gin.HandlerFun
 			}
 		}
 
-		nearsphere := utils.NearSphere(mconn, collname, geospatial)
-		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: nearsphere})
+		nearsphere, err := utils.NearSphere(mconn, collname, geospatial)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetNearSphereDoc: " + err.Error()})
+			return
+		}
+		result := utils.GeojsonNameString(nearsphere)
+		if result == "" {
+			c.JSON(http.StatusOK, models.Pesan{Status: true, Empty: true, Message: "Tidak ada geojson yang berdekatan pada koordinat anda dengan max distance " + strconv.FormatFloat(geospatial.Max, 'f', -1, 64) + " meter dan min distance " + strconv.FormatFloat(geospatial.Min, 'f', -1, 64) + " meter"})
+			return
+		}
+		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: "Geojson yang berdekatan pada koordinat anda dengan max distance " + strconv.FormatFloat(geospatial.Max, 'f', -1, 64) + " meter dan min distance " + strconv.FormatFloat(geospatial.Min, 'f', -1, 64) + " meter adalah: " + result})
 	}
 }
 
@@ -236,8 +273,13 @@ func PostBox(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 			}
 		}
 
-		box := utils.Box(mconn, collname, geospatial)
-		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: box})
+		box, err := utils.Box(mconn, collname, geospatial)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetBoxDoc: " + err.Error()})
+			return
+		}
+		result := utils.GeojsonNameString(box)
+		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: result})
 	}
 }
 
@@ -265,8 +307,17 @@ func PostCenter(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 			}
 		}
 
-		box := utils.Center(mconn, collname, geospatial)
-		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: box})
+		center, err := utils.Center(mconn, collname, geospatial)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetCenterDoc: " + err.Error()})
+			return
+		}
+		result := utils.GeojsonNameString(center)
+		if result == "" {
+			c.JSON(http.StatusOK, models.Pesan{Status: true, Empty: true, Message: "Tidak ada geojson yang berada di dalam lingkaran dengan radius " + strconv.FormatFloat(geospatial.Radius, 'f', -1, 64)})
+			return
+		}
+		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: "Geojson yang berada di dalam lingkaran dengan radius " + strconv.FormatFloat(geospatial.Radius, 'f', -1, 64) + " adalah: " + result})
 	}
 }
 
@@ -294,8 +345,17 @@ func PostCenterSphere(publickey, mongoenv, dbname, collname string) gin.HandlerF
 			}
 		}
 
-		box := utils.CenterSphere(mconn, collname, geospatial)
-		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: box})
+		centersphere, err := utils.CenterSphere(mconn, collname, geospatial)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetCenterSphereDoc: " + err.Error()})
+			return
+		}
+		result := utils.GeojsonNameString(centersphere)
+		if result == "" {
+			c.JSON(http.StatusOK, models.Pesan{Status: true, Empty: true, Message: "Tidak ada geojson yang berada di dalam lingkaran dengan radius " + strconv.FormatFloat(geospatial.Radius, 'f', -1, 64)})
+			return
+		}
+		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: "Geojson yang berada di dalam lingkaran dengan radius " + strconv.FormatFloat(geospatial.Radius, 'f', -1, 64) + " adalah: " + result})
 	}
 }
 

@@ -27,31 +27,31 @@ func GetAllBangunan(mconn *mongo.Database, collname string) []models.GeoJson {
 	return helpers.GetAllDoc[[]models.GeoJson](mconn, collname)
 }
 
-func GeoIntersects(mconn *mongo.Database, collname string, geospatial models.Geospatial) string {
+func GeoIntersects(mconn *mongo.Database, collname string, geospatial models.Geospatial) ([]models.FullGeoJson, error) {
 	return helpers.GetGeoIntersectsDoc(mconn, collname, geospatial)
 }
 
-func GeoWithin(mconn *mongo.Database, collname string, geospatial models.Geospatial) string {
+func GeoWithin(mconn *mongo.Database, collname string, geospatial models.Geospatial) ([]models.FullGeoJson, error) {
 	return helpers.GetGeoWithinDoc(mconn, collname, geospatial)
 }
 
-func Near(mconn *mongo.Database, collname string, geospatial models.Geospatial) string {
+func Near(mconn *mongo.Database, collname string, geospatial models.Geospatial) ([]models.FullGeoJson, error) {
 	return helpers.GetNearDoc(mconn, collname, geospatial)
 }
 
-func NearSphere(mconn *mongo.Database, collname string, geospatial models.Geospatial) string {
+func NearSphere(mconn *mongo.Database, collname string, geospatial models.Geospatial) ([]models.FullGeoJson, error) {
 	return helpers.GetNearSphereDoc(mconn, collname, geospatial)
 }
 
-func Box(mconn *mongo.Database, collname string, geospatial models.Geospatial) string {
+func Box(mconn *mongo.Database, collname string, geospatial models.Geospatial) ([]models.FullGeoJson, error) {
 	return helpers.GetBoxDoc(mconn, collname, geospatial)
 }
 
-func Center(mconn *mongo.Database, collname string, geospatial models.Geospatial) string {
+func Center(mconn *mongo.Database, collname string, geospatial models.Geospatial) ([]models.FullGeoJson, error) {
 	return helpers.GetCenterDoc(mconn, collname, geospatial)
 }
 
-func CenterSphere(mconn *mongo.Database, collname string, geospatial models.Geospatial) string {
+func CenterSphere(mconn *mongo.Database, collname string, geospatial models.Geospatial) ([]models.FullGeoJson, error) {
 	return helpers.GetCenterSphereDoc(mconn, collname, geospatial)
 }
 

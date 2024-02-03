@@ -3,8 +3,6 @@ package helpers
 import (
 	"context"
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/Befous/BackendGin/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -169,7 +167,7 @@ func DocExists[T any](db *mongo.Database, collname string, filter bson.M, doc T)
 	return err == nil
 }
 
-func GetGeoIntersectsDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
+func GetGeoIntersectsDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result []models.FullGeoJson, err error) {
 	filter := bson.M{
 		"geometry": bson.M{
 			"$geoIntersects": bson.M{
@@ -181,43 +179,22 @@ func GetGeoIntersectsDoc(db *mongo.Database, collname string, geospatial models.
 		},
 	}
 
-	var docs []models.FullGeoJson
-	cur, err := db.Collection(collname).Find(context.TODO(), filter)
+	ctx := context.TODO()
+	cur, err := db.Collection(collname).Find(ctx, filter)
 	if err != nil {
-		fmt.Printf("Geo Intersects: %v\n", err)
-		return ""
+		fmt.Printf("GetGeoIntersectsDoc: %v\n", err)
+		return nil, err
 	}
-
-	defer cur.Close(context.TODO())
-
-	for cur.Next(context.TODO()) {
-		var doc models.FullGeoJson
-		err := cur.Decode(&doc)
-		if err != nil {
-			fmt.Printf("Decode Err: %v\n", err)
-			continue
-		}
-		docs = append(docs, doc)
+	defer cur.Close(ctx)
+	err = cur.All(ctx, &result)
+	if err != nil {
+		fmt.Printf("GetGeoIntersectsDoc Cursor Err: %v\n", err)
+		return nil, err
 	}
-
-	if err := cur.Err(); err != nil {
-		fmt.Printf("Cursor Err: %v\n", err)
-		return ""
-	}
-
-	// Ambil nilai properti Name dari setiap dokumen
-	var names []string
-	for _, doc := range docs {
-		names = append(names, doc.Properties.Name)
-	}
-
-	// Gabungkan nilai-nilai dengan koma
-	result = strings.Join(names, ", ")
-
-	return "Geojson yang bersinggungan dengan koordinat anda adalah: " + result
+	return result, nil
 }
 
-func GetGeoWithinDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
+func GetGeoWithinDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result []models.FullGeoJson, err error) {
 	filter := bson.M{
 		"geometry": bson.M{
 			"$geoWithin": bson.M{
@@ -229,43 +206,22 @@ func GetGeoWithinDoc(db *mongo.Database, collname string, geospatial models.Geos
 		},
 	}
 
-	var docs []models.FullGeoJson
-	cur, err := db.Collection(collname).Find(context.TODO(), filter)
+	ctx := context.TODO()
+	cur, err := db.Collection(collname).Find(ctx, filter)
 	if err != nil {
-		fmt.Printf("GeoWithin: %v\n", err)
-		return ""
+		fmt.Printf("GetGeoWithinDoc: %v\n", err)
+		return nil, err
 	}
-
-	defer cur.Close(context.TODO())
-
-	for cur.Next(context.TODO()) {
-		var doc models.FullGeoJson
-		err := cur.Decode(&doc)
-		if err != nil {
-			fmt.Printf("Decode Err: %v\n", err)
-			continue
-		}
-		docs = append(docs, doc)
+	defer cur.Close(ctx)
+	err = cur.All(ctx, &result)
+	if err != nil {
+		fmt.Printf("GetGeoWithinDoc Cursor Err: %v\n", err)
+		return nil, err
 	}
-
-	if err := cur.Err(); err != nil {
-		fmt.Printf("Cursor Err: %v\n", err)
-		return ""
-	}
-
-	// Ambil nilai properti Name dari setiap dokumen
-	var names []string
-	for _, doc := range docs {
-		names = append(names, doc.Properties.Name)
-	}
-
-	// Gabungkan nilai-nilai dengan koma
-	result = strings.Join(names, ", ")
-
-	return "Geojson yang berada di dalam koordinat anda adalah: " + result
+	return result, nil
 }
 
-func GetNearDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
+func GetNearDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result []models.FullGeoJson, err error) {
 	filter := bson.M{
 		"geometry": bson.M{
 			"$near": bson.M{
@@ -279,43 +235,22 @@ func GetNearDoc(db *mongo.Database, collname string, geospatial models.Geospatia
 		},
 	}
 
-	var docs []models.FullGeoJson
-	cur, err := db.Collection(collname).Find(context.TODO(), filter)
+	ctx := context.TODO()
+	cur, err := db.Collection(collname).Find(ctx, filter)
 	if err != nil {
-		fmt.Printf("Near: %v\n", err)
-		return ""
+		fmt.Printf("GetNearDoc: %v\n", err)
+		return nil, err
 	}
-
-	defer cur.Close(context.TODO())
-
-	for cur.Next(context.TODO()) {
-		var doc models.FullGeoJson
-		err := cur.Decode(&doc)
-		if err != nil {
-			fmt.Printf("Decode Err: %v\n", err)
-			continue
-		}
-		docs = append(docs, doc)
+	defer cur.Close(ctx)
+	err = cur.All(ctx, &result)
+	if err != nil {
+		fmt.Printf("GetNearDoc Cursor Err: %v\n", err)
+		return nil, err
 	}
-
-	if err := cur.Err(); err != nil {
-		fmt.Printf("Cursor Err: %v\n", err)
-		return ""
-	}
-
-	// Ambil nilai properti Name dari setiap dokumen
-	var names []string
-	for _, doc := range docs {
-		names = append(names, doc.Properties.Name)
-	}
-
-	// Gabungkan nilai-nilai dengan koma
-	result = strings.Join(names, ", ")
-
-	return "Geojson yang berdekatan dengan koordinat anda adalah: " + result
+	return result, nil
 }
 
-func GetNearSphereDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
+func GetNearSphereDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result []models.FullGeoJson, err error) {
 	filter := bson.M{
 		"geometry": bson.M{
 			"$nearSphere": bson.M{
@@ -329,43 +264,22 @@ func GetNearSphereDoc(db *mongo.Database, collname string, geospatial models.Geo
 		},
 	}
 
-	var docs []models.FullGeoJson
-	cur, err := db.Collection(collname).Find(context.TODO(), filter)
+	ctx := context.TODO()
+	cur, err := db.Collection(collname).Find(ctx, filter)
 	if err != nil {
-		fmt.Printf("Near Sphere: %v\n", err)
-		return ""
+		fmt.Printf("GetNearSphereDoc: %v\n", err)
+		return nil, err
 	}
-
-	defer cur.Close(context.TODO())
-
-	for cur.Next(context.TODO()) {
-		var doc models.FullGeoJson
-		err := cur.Decode(&doc)
-		if err != nil {
-			fmt.Printf("Decode Err: %v\n", err)
-			continue
-		}
-		docs = append(docs, doc)
+	defer cur.Close(ctx)
+	err = cur.All(ctx, &result)
+	if err != nil {
+		fmt.Printf("GetNearSphereDoc Cursor Err: %v\n", err)
+		return nil, err
 	}
-
-	if err := cur.Err(); err != nil {
-		fmt.Printf("Cursor Err: %v\n", err)
-		return ""
-	}
-
-	// Ambil nilai properti Name dari setiap dokumen
-	var names []string
-	for _, doc := range docs {
-		names = append(names, doc.Properties.Name)
-	}
-
-	// Gabungkan nilai-nilai dengan koma
-	result = strings.Join(names, ", ")
-
-	return "Geojson yang berdekatan dengan koordinat anda adalah: " + result
+	return result, nil
 }
 
-func GetBoxDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
+func GetBoxDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result []models.FullGeoJson, err error) {
 	filter := bson.M{
 		"geometry": bson.M{
 			"$geoWithin": bson.M{
@@ -374,43 +288,22 @@ func GetBoxDoc(db *mongo.Database, collname string, geospatial models.Geospatial
 		},
 	}
 
-	var docs []models.FullGeoJson
-	cur, err := db.Collection(collname).Find(context.TODO(), filter)
+	ctx := context.TODO()
+	cur, err := db.Collection(collname).Find(ctx, filter)
 	if err != nil {
-		fmt.Printf("Box: %v\n", err)
-		return ""
+		fmt.Printf("GetBoxDoc: %v\n", err)
+		return nil, err
 	}
-
-	defer cur.Close(context.TODO())
-
-	for cur.Next(context.TODO()) {
-		var doc models.FullGeoJson
-		err := cur.Decode(&doc)
-		if err != nil {
-			fmt.Printf("Decode Err: %v\n", err)
-			continue
-		}
-		docs = append(docs, doc)
+	defer cur.Close(ctx)
+	err = cur.All(ctx, &result)
+	if err != nil {
+		fmt.Printf("GetBoxDoc Cursor Err: %v\n", err)
+		return nil, err
 	}
-
-	if err := cur.Err(); err != nil {
-		fmt.Printf("Cursor Err: %v\n", err)
-		return ""
-	}
-
-	// Ambil nilai properti Name dari setiap dokumen
-	var names []string
-	for _, doc := range docs {
-		names = append(names, doc.Properties.Name)
-	}
-
-	// Gabungkan nilai-nilai dengan koma
-	result = strings.Join(names, ", ")
-
-	return "Geojson yang berada di dalam box anda adalah: " + result
+	return result, nil
 }
 
-func GetCenterDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
+func GetCenterDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result []models.FullGeoJson, err error) {
 	filter := bson.M{
 		"geometry": bson.M{
 			"$geoWithin": bson.M{
@@ -419,43 +312,22 @@ func GetCenterDoc(db *mongo.Database, collname string, geospatial models.Geospat
 		},
 	}
 
-	var docs []models.FullGeoJson
-	cur, err := db.Collection(collname).Find(context.TODO(), filter)
+	ctx := context.TODO()
+	cur, err := db.Collection(collname).Find(ctx, filter)
 	if err != nil {
-		fmt.Printf("Center: %v\n", err)
-		return ""
+		fmt.Printf("GetCenterDoc: %v\n", err)
+		return nil, err
 	}
-
-	defer cur.Close(context.TODO())
-
-	for cur.Next(context.TODO()) {
-		var doc models.FullGeoJson
-		err := cur.Decode(&doc)
-		if err != nil {
-			fmt.Printf("Decode Err: %v\n", err)
-			continue
-		}
-		docs = append(docs, doc)
+	defer cur.Close(ctx)
+	err = cur.All(ctx, &result)
+	if err != nil {
+		fmt.Printf("GetCenterDoc Cursor Err: %v\n", err)
+		return nil, err
 	}
-
-	if err := cur.Err(); err != nil {
-		fmt.Printf("Cursor Err: %v\n", err)
-		return ""
-	}
-
-	// Ambil nilai properti Name dari setiap dokumen
-	var names []string
-	for _, doc := range docs {
-		names = append(names, doc.Properties.Name)
-	}
-
-	// Gabungkan nilai-nilai dengan koma
-	result = strings.Join(names, ", ")
-
-	return "Geojson yang berada di dalam lingkaran dengan radius " + strconv.FormatFloat(geospatial.Radius, 'f', -1, 64) + " adalah: " + result
+	return result, nil
 }
 
-func GetCenterSphereDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result string) {
+func GetCenterSphereDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result []models.FullGeoJson, err error) {
 	filter := bson.M{
 		"geometry": bson.M{
 			"$geoWithin": bson.M{
@@ -464,38 +336,17 @@ func GetCenterSphereDoc(db *mongo.Database, collname string, geospatial models.G
 		},
 	}
 
-	var docs []models.FullGeoJson
-	cur, err := db.Collection(collname).Find(context.TODO(), filter)
+	ctx := context.TODO()
+	cur, err := db.Collection(collname).Find(ctx, filter)
 	if err != nil {
-		fmt.Printf("Center Sphere: %v\n", err)
-		return ""
+		fmt.Printf("GetCenterSphereDoc: %v\n", err)
+		return nil, err
 	}
-
-	defer cur.Close(context.TODO())
-
-	for cur.Next(context.TODO()) {
-		var doc models.FullGeoJson
-		err := cur.Decode(&doc)
-		if err != nil {
-			fmt.Printf("Decode Err: %v\n", err)
-			continue
-		}
-		docs = append(docs, doc)
+	defer cur.Close(ctx)
+	err = cur.All(ctx, &result)
+	if err != nil {
+		fmt.Printf("GetCenterSphereDoc Cursor Err: %v\n", err)
+		return nil, err
 	}
-
-	if err := cur.Err(); err != nil {
-		fmt.Printf("Cursor Err: %v\n", err)
-		return ""
-	}
-
-	// Ambil nilai properti Name dari setiap dokumen
-	var names []string
-	for _, doc := range docs {
-		names = append(names, doc.Properties.Name)
-	}
-
-	// Gabungkan nilai-nilai dengan koma
-	result = strings.Join(names, ", ")
-
-	return "Geojson yang berada di dalam lingkaran dengan radius " + strconv.FormatFloat(geospatial.Radius, 'f', -1, 64) + " adalah: " + result
+	return result, nil
 }

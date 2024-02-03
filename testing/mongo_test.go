@@ -15,8 +15,13 @@ func TestEncode(t *testing.T) {
 		Coordinates: []float64{
 			103.62074450557095, -1.632735059500547,
 		},
+		Radius: 0.00003,
 	}
 
-	test := helpers.GetCenterDoc(mconn, "geojson", geospatial)
-	fmt.Println(test)
+	test, err := helpers.GetCenterSphereDoc(mconn, "geojson", geospatial)
+	if err != nil {
+		fmt.Println(err)
+	}
+	result := utils.GeojsonNameString(test)
+	fmt.Println(result)
 }
