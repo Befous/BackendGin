@@ -26,7 +26,7 @@ func Create2dsphere(mconn models.DBInfo) (db *mongo.Database) {
 		fmt.Printf("Error connecting to MongoDB: %v", err)
 	}
 
-	// Mengecek apakah indeks sudah ada
+	// Mengecek apakah index sudah ada
 	collection := client.Database(mconn.DBName).Collection(mconn.CollectionName)
 	cursor, err := collection.Indexes().List(context.TODO())
 	if err != nil {
@@ -61,12 +61,13 @@ func Create2dsphere(mconn models.DBInfo) (db *mongo.Database) {
 	return client.Database(mconn.DBName)
 }
 
-func InsertOneDoc(db *mongo.Database, collection string, doc interface{}) (insertedID interface{}) {
+func InsertOneDoc(db *mongo.Database, collection string, doc interface{}) (insertedID interface{}, err error) {
 	insertResult, err := db.Collection(collection).InsertOne(context.TODO(), doc)
 	if err != nil {
-		fmt.Printf("AIteung Mongo, InsertOneDoc: %v\n", err)
+		fmt.Printf("InsertOneDoc: %v\n", err)
+		return nil, err
 	}
-	return insertResult.InsertedID
+	return insertResult.InsertedID, nil
 }
 
 func GetOneDoc[T any](db *mongo.Database, collection string, filter bson.M) (doc T) {
@@ -80,38 +81,39 @@ func GetOneDoc[T any](db *mongo.Database, collection string, filter bson.M) (doc
 func GetOneLatestDoc[T any](db *mongo.Database, collection string, filter bson.M) (doc T, err error) {
 	opts := options.FindOne().SetSort(bson.M{"$natural": -1})
 	err = db.Collection(collection).FindOne(context.TODO(), filter, opts).Decode(&doc)
-	if err != nil {
-		return
-	}
-	return
+	return doc, err
 }
 
-func GetAllDocByFilter[T any](db *mongo.Database, collection string, filter bson.M) (doc T) {
+func GetAllDocByFilter[T any](db *mongo.Database, collection string, filter bson.M) (doc []T, err error) {
 	ctx := context.TODO()
 	cur, err := db.Collection(collection).Find(ctx, filter)
 	if err != nil {
 		fmt.Printf("GetAllDoc: %v\n", err)
+		return nil, err
 	}
 	defer cur.Close(ctx)
 	err = cur.All(ctx, &doc)
 	if err != nil {
 		fmt.Printf("GetAllDoc Cursor Err: %v\n", err)
+		return nil, err
 	}
-	return
+	return doc, nil
 }
 
-func GetAllDoc[T any](db *mongo.Database, collection string) (doc T) {
+func GetAllDoc[T any](db *mongo.Database, collection string) (doc []T, err error) {
 	ctx := context.TODO()
 	cur, err := db.Collection(collection).Find(ctx, bson.M{})
 	if err != nil {
 		fmt.Printf("GetAllDoc: %v\n", err)
+		return nil, err
 	}
 	defer cur.Close(ctx)
 	err = cur.All(ctx, &doc)
 	if err != nil {
 		fmt.Printf("GetAllDoc Cursor Err: %v\n", err)
+		return nil, err
 	}
-	return
+	return doc, nil
 }
 
 func GetAllDistinctDoc(db *mongo.Database, filter bson.M, fieldname, collection string) (doc []any) {
@@ -152,14 +154,14 @@ func GetRandomDoc[T any](db *mongo.Database, collection string, size uint) (resu
 		{{Key: "$sample", Value: bson.D{{Key: "size", Value: size}}}},
 	}
 	ctx := context.Background()
-	cursor, err := db.Collection(collection).Aggregate(ctx, filter)
+	cur, err := db.Collection(collection).Aggregate(ctx, filter)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	err = cursor.All(ctx, &result)
+	err = cur.All(ctx, &result)
 
-	return
+	return result, nil
 }
 
 func DocExists[T any](db *mongo.Database, collname string, filter bson.M, doc T) (result bool) {
@@ -167,9 +169,9 @@ func DocExists[T any](db *mongo.Database, collname string, filter bson.M, doc T)
 	return err == nil
 }
 
-func GetGeoIntersectsDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result []models.FullGeoJson, err error) {
+func GetGeoIntersectsDoc[T any](db *mongo.Database, collname, locfield string, geospatial models.Geospatial) (result []T, err error) {
 	filter := bson.M{
-		"geometry": bson.M{
+		locfield: bson.M{
 			"$geoIntersects": bson.M{
 				"$geometry": bson.M{
 					"type":        geospatial.Type,
@@ -194,9 +196,9 @@ func GetGeoIntersectsDoc(db *mongo.Database, collname string, geospatial models.
 	return result, nil
 }
 
-func GetGeoWithinDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result []models.FullGeoJson, err error) {
+func GetGeoWithinDoc[T any](db *mongo.Database, collname, locfield string, geospatial models.Geospatial) (result []T, err error) {
 	filter := bson.M{
-		"geometry": bson.M{
+		locfield: bson.M{
 			"$geoWithin": bson.M{
 				"$geometry": bson.M{
 					"type":        geospatial.Type,
@@ -221,9 +223,9 @@ func GetGeoWithinDoc(db *mongo.Database, collname string, geospatial models.Geos
 	return result, nil
 }
 
-func GetNearDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result []models.FullGeoJson, err error) {
+func GetNearDoc[T any](db *mongo.Database, collname, locfield string, geospatial models.Geospatial) (result []T, err error) {
 	filter := bson.M{
-		"geometry": bson.M{
+		locfield: bson.M{
 			"$near": bson.M{
 				"$geometry": bson.M{
 					"type":        geospatial.Type,
@@ -250,9 +252,9 @@ func GetNearDoc(db *mongo.Database, collname string, geospatial models.Geospatia
 	return result, nil
 }
 
-func GetNearSphereDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result []models.FullGeoJson, err error) {
+func GetNearSphereDoc[T any](db *mongo.Database, collname, locfield string, geospatial models.Geospatial) (result []T, err error) {
 	filter := bson.M{
-		"geometry": bson.M{
+		locfield: bson.M{
 			"$nearSphere": bson.M{
 				"$geometry": bson.M{
 					"type":        geospatial.Type,
@@ -279,9 +281,9 @@ func GetNearSphereDoc(db *mongo.Database, collname string, geospatial models.Geo
 	return result, nil
 }
 
-func GetBoxDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result []models.FullGeoJson, err error) {
+func GetBoxDoc[T any](db *mongo.Database, collname, locfield string, geospatial models.Geospatial) (result []T, err error) {
 	filter := bson.M{
-		"geometry": bson.M{
+		locfield: bson.M{
 			"$geoWithin": bson.M{
 				"$box": geospatial.Coordinates,
 			},
@@ -303,9 +305,9 @@ func GetBoxDoc(db *mongo.Database, collname string, geospatial models.Geospatial
 	return result, nil
 }
 
-func GetCenterDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result []models.FullGeoJson, err error) {
+func GetCenterDoc[T any](db *mongo.Database, collname, locfield string, geospatial models.Geospatial) (result []T, err error) {
 	filter := bson.M{
-		"geometry": bson.M{
+		locfield: bson.M{
 			"$geoWithin": bson.M{
 				"$center": []interface{}{geospatial.Coordinates, geospatial.Radius},
 			},
@@ -327,9 +329,9 @@ func GetCenterDoc(db *mongo.Database, collname string, geospatial models.Geospat
 	return result, nil
 }
 
-func GetCenterSphereDoc(db *mongo.Database, collname string, geospatial models.Geospatial) (result []models.FullGeoJson, err error) {
+func GetCenterSphereDoc[T any](db *mongo.Database, collname, locfield string, geospatial models.Geospatial) (result []T, err error) {
 	filter := bson.M{
-		"geometry": bson.M{
+		locfield: bson.M{
 			"$geoWithin": bson.M{
 				"$centerSphere": []interface{}{geospatial.Coordinates, geospatial.Radius},
 			},

@@ -18,7 +18,7 @@ func TestEncode(t *testing.T) {
 		Radius: 0.00003,
 	}
 
-	test, err := helpers.GetCenterSphereDoc(mconn, "geojson", geospatial)
+	test, err := helpers.GetCenterSphereDoc[models.FullGeoJson](mconn, "geojson", "geometry", geospatial)
 	if err != nil {
 		fmt.Println(err)
 	}

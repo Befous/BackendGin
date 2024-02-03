@@ -7,12 +7,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func InsertUser(mongoenv *mongo.Database, collname string, datauser models.User) interface{} {
+func InsertUser(mongoenv *mongo.Database, collname string, datauser models.User) (interface{}, error) {
 	return helpers.InsertOneDoc(mongoenv, collname, datauser)
 }
 
-func GetAllUser(mconn *mongo.Database, collname string) []models.User {
-	return helpers.GetAllDoc[[]models.User](mconn, collname)
+func GetAllUser(mconn *mongo.Database, collname string) ([]models.User, error) {
+	return helpers.GetAllDoc[models.User](mconn, collname)
 }
 
 func FindUser(mconn *mongo.Database, collname string, userdata models.User) models.User {

@@ -104,7 +104,11 @@ func AmbilSemuaUser(publickey, mongoenv, dbname, collname string) gin.HandlerFun
 			return
 		}
 		// Get data user
-		datauser := utils.GetAllUser(mconn, collname)
+		datauser, err := utils.GetAllUser(mconn, collname)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetAllDoc error: " + err.Error()})
+			return
+		}
 		c.JSON(http.StatusOK, datauser)
 	}
 }

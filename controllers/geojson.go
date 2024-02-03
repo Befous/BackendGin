@@ -123,7 +123,7 @@ func PostGeoIntersects(publickey, mongoenv, dbname, collname string) gin.Handler
 
 		geointersects, err := utils.GeoIntersects(mconn, collname, geospatial)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetGeoIntersectsDoc: " + err.Error()})
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetGeoIntersectsDoc error: " + err.Error()})
 			return
 		}
 		result := utils.GeojsonNameString(geointersects)
@@ -161,7 +161,7 @@ func PostGeoWithin(publickey, mongoenv, dbname, collname string) gin.HandlerFunc
 
 		geowithin, err := utils.GeoWithin(mconn, collname, geospatial)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetGeoWithinDoc: " + err.Error()})
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetGeoWithinDoc error: " + err.Error()})
 			return
 		}
 		result := utils.GeojsonNameString(geowithin)
@@ -199,7 +199,7 @@ func PostNear(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 
 		near, err := utils.Near(mconn, collname, geospatial)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetNearDoc: " + err.Error()})
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetNearDoc error: " + err.Error()})
 			return
 		}
 		result := utils.GeojsonNameString(near)
@@ -237,7 +237,7 @@ func PostNearSphere(publickey, mongoenv, dbname, collname string) gin.HandlerFun
 
 		nearsphere, err := utils.NearSphere(mconn, collname, geospatial)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetNearSphereDoc: " + err.Error()})
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetNearSphereDoc error: " + err.Error()})
 			return
 		}
 		result := utils.GeojsonNameString(nearsphere)
@@ -275,7 +275,7 @@ func PostBox(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 
 		box, err := utils.Box(mconn, collname, geospatial)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetBoxDoc: " + err.Error()})
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetBoxDoc error: " + err.Error()})
 			return
 		}
 		result := utils.GeojsonNameString(box)
@@ -313,7 +313,7 @@ func PostCenter(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 
 		center, err := utils.Center(mconn, collname, geospatial)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetCenterDoc: " + err.Error()})
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetCenterDoc error: " + err.Error()})
 			return
 		}
 		result := utils.GeojsonNameString(center)
@@ -351,7 +351,7 @@ func PostCenterSphere(publickey, mongoenv, dbname, collname string) gin.HandlerF
 
 		centersphere, err := utils.CenterSphere(mconn, collname, geospatial)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetCenterSphereDoc: " + err.Error()})
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetCenterSphereDoc error: " + err.Error()})
 			return
 		}
 		result := utils.GeojsonNameString(centersphere)
@@ -366,7 +366,11 @@ func PostCenterSphere(publickey, mongoenv, dbname, collname string) gin.HandlerF
 func AmbilDataGeojson(mongoenv, dbname, collname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mconn := utils.SetConnection(mongoenv, dbname)
-		datagedung := utils.GetAllBangunan(mconn, collname)
+		datagedung, err := utils.GetAllBangunan(mconn, collname)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "GetAllDoc error: " + err.Error()})
+			return
+		}
 		c.JSON(http.StatusOK, datagedung)
 	}
 }

@@ -9,50 +9,50 @@ import (
 
 // Create
 
-func PostPoint(mconn *mongo.Database, collection string, pointdata models.GeoJsonPoint) interface{} {
+func PostPoint(mconn *mongo.Database, collection string, pointdata models.GeoJsonPoint) (interface{}, error) {
 	return helpers.InsertOneDoc(mconn, collection, pointdata)
 }
 
-func PostLinestring(mconn *mongo.Database, collection string, linestringdata models.GeoJsonLineString) interface{} {
+func PostLinestring(mconn *mongo.Database, collection string, linestringdata models.GeoJsonLineString) (interface{}, error) {
 	return helpers.InsertOneDoc(mconn, collection, linestringdata)
 }
 
-func PostPolygon(mconn *mongo.Database, collection string, polygondata models.GeoJsonPolygon) interface{} {
+func PostPolygon(mconn *mongo.Database, collection string, polygondata models.GeoJsonPolygon) (interface{}, error) {
 	return helpers.InsertOneDoc(mconn, collection, polygondata)
 }
 
 // Read
 
-func GetAllBangunan(mconn *mongo.Database, collname string) []models.GeoJson {
-	return helpers.GetAllDoc[[]models.GeoJson](mconn, collname)
+func GetAllBangunan(mconn *mongo.Database, collname string) ([]models.GeoJson, error) {
+	return helpers.GetAllDoc[models.GeoJson](mconn, collname)
 }
 
 func GeoIntersects(mconn *mongo.Database, collname string, geospatial models.Geospatial) ([]models.FullGeoJson, error) {
-	return helpers.GetGeoIntersectsDoc(mconn, collname, geospatial)
+	return helpers.GetGeoIntersectsDoc[models.FullGeoJson](mconn, collname, "geometry", geospatial)
 }
 
 func GeoWithin(mconn *mongo.Database, collname string, geospatial models.Geospatial) ([]models.FullGeoJson, error) {
-	return helpers.GetGeoWithinDoc(mconn, collname, geospatial)
+	return helpers.GetGeoWithinDoc[models.FullGeoJson](mconn, collname, "geometry", geospatial)
 }
 
 func Near(mconn *mongo.Database, collname string, geospatial models.Geospatial) ([]models.FullGeoJson, error) {
-	return helpers.GetNearDoc(mconn, collname, geospatial)
+	return helpers.GetNearDoc[models.FullGeoJson](mconn, collname, "geometry", geospatial)
 }
 
 func NearSphere(mconn *mongo.Database, collname string, geospatial models.Geospatial) ([]models.FullGeoJson, error) {
-	return helpers.GetNearSphereDoc(mconn, collname, geospatial)
+	return helpers.GetNearSphereDoc[models.FullGeoJson](mconn, collname, "geometry", geospatial)
 }
 
 func Box(mconn *mongo.Database, collname string, geospatial models.Geospatial) ([]models.FullGeoJson, error) {
-	return helpers.GetBoxDoc(mconn, collname, geospatial)
+	return helpers.GetBoxDoc[models.FullGeoJson](mconn, collname, "geometry", geospatial)
 }
 
 func Center(mconn *mongo.Database, collname string, geospatial models.Geospatial) ([]models.FullGeoJson, error) {
-	return helpers.GetCenterDoc(mconn, collname, geospatial)
+	return helpers.GetCenterDoc[models.FullGeoJson](mconn, collname, "geometry", geospatial)
 }
 
 func CenterSphere(mconn *mongo.Database, collname string, geospatial models.Geospatial) ([]models.FullGeoJson, error) {
-	return helpers.GetCenterSphereDoc(mconn, collname, geospatial)
+	return helpers.GetCenterSphereDoc[models.FullGeoJson](mconn, collname, "geometry", geospatial)
 }
 
 // Update
