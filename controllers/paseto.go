@@ -36,9 +36,10 @@ func TokenValueMongo(publickey, mongoenv, dbname, collname string) gin.HandlerFu
 }
 
 func SudahLogin(c *gin.Context) {
-	pconn := utils.SetConnectionPostgres("HOST", "USER", "PASSWORD", "DB_NAME", "PORT_POSTGRES", "SSL")
-	defer pconn.Close()
 	// Authorization
 	middleware.Authorization("publickey")(c)
+	if c.IsAborted() {
+		return
+	}
 	c.JSON(http.StatusOK, models.Pesan{Status: true, Message: "Sudah Login"})
 }
