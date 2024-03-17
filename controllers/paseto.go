@@ -15,9 +15,6 @@ func TokenValueMongo(publickey, mongoenv, dbname, collname string) gin.HandlerFu
 		var response models.CredentialUser
 		// Authorization
 		middleware.Authorization(publickey)(c)
-		if c.IsAborted() {
-			return
-		}
 		name := c.GetString("name")
 		username := c.GetString("username")
 		role := c.GetString("role")
@@ -43,8 +40,5 @@ func SudahLogin(c *gin.Context) {
 	defer pconn.Close()
 	// Authorization
 	middleware.Authorization("publickey")(c)
-	if c.IsAborted() {
-		return
-	}
 	c.JSON(http.StatusOK, models.Pesan{Status: true, Message: "Sudah Login"})
 }
