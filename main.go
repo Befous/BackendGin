@@ -1,12 +1,21 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Befous/BackendGin/models"
 	"github.com/Befous/BackendGin/routes"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
+
+func init() {
+	err := godotenv.Load()
+	if err != nil {
+		fmt.Println("Error occurred on .env file, please check ", err.Error())
+	}
+}
 
 func main() {
 	router := gin.New()

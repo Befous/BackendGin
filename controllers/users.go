@@ -11,10 +11,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Registrasi(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
+func RegistrasiMongo(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mconn := utils.SetConnection(mongoenv, dbname)
-		var user models.User
+		var user models.Users
 		err := c.BindJSON(&user)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
@@ -54,10 +54,10 @@ func Registrasi(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	}
 }
 
-func Login(privatekey, mongoenv, dbname, collname string) gin.HandlerFunc {
+func LoginMongo(privatekey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mconn := utils.SetConnection(mongoenv, dbname)
-		var user models.User
+		var user models.Users
 		err := c.BindJSON(&user)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
@@ -88,7 +88,7 @@ func Login(privatekey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	}
 }
 
-func AmbilSemuaUser(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
+func AmbilSemuaUserMongo(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mconn := utils.SetConnection(mongoenv, dbname)
 		// Authorization
@@ -113,10 +113,10 @@ func AmbilSemuaUser(publickey, mongoenv, dbname, collname string) gin.HandlerFun
 	}
 }
 
-func EditUser(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
+func EditUserMongo(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mconn := utils.SetConnection(mongoenv, dbname)
-		var user models.User
+		var user models.Users
 		err := c.BindJSON(&user)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
@@ -161,10 +161,10 @@ func EditUser(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	}
 }
 
-func HapusUser(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
+func HapusUserMongo(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mconn := utils.SetConnection(mongoenv, dbname)
-		var user models.User
+		var user models.Users
 		err := c.BindJSON(&user)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
@@ -195,4 +195,96 @@ func HapusUser(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 		utils.DeleteUser(mconn, collname, user)
 		c.JSON(http.StatusOK, models.Pesan{Status: true, Message: "Berhasil hapus " + user.Username + " dari database"})
 	}
+}
+
+func RegistrasiPostgres(c *gin.Context) {
+	var users models.Users
+	pconn := utils.SetConnectionPostgres("HOST", "USER", "PASSWORD", "DB_NAME", "PORT", "require")
+	defer pconn.Close()
+	err := c.BindJSON(&users)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
+		return
+	}
+	if users.Username == "" {
+		c.JSON(http.StatusInternalServerError, models.Pesan{Status: false, Message: "Parameter username tidak boleh kosong"})
+		return
+	}
+	if users.Password == "" {
+		c.JSON(http.StatusInternalServerError, models.Pesan{Status: false, Message: "Parameter password tidak boleh kosong"})
+		return
+	}
+	// Hash password
+	hash, hashErr := helpers.HashPassword(users.Password)
+	if hashErr != nil {
+		c.JSON(http.StatusInternalServerError, models.Pesan{Status: false, Message: "Gagal hash password: " + hashErr.Error()})
+		return
+	}
+	_, err = pconn.Exec("insert into users(username, password, role) values ($1, $2, $3)", users.Username, hash, users.Role)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Pesan{Status: false, Message: "Error sql: " + err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, models.Pesan{Status: true, Message: "Berhasil input data"})
+}
+
+func LoginPostgres(c *gin.Context) {
+	var users models.Users
+	pconn := utils.SetConnectionPostgres("HOST", "USER", "PASSWORD", "DB_NAME", "PORT", "require")
+	defer pconn.Close()
+	err := c.BindJSON(&users)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, models.Pesan{Status: false, Message: "Error parsing application/json: " + err.Error()})
+		return
+	}
+	if users.Username == "" {
+		c.JSON(http.StatusInternalServerError, models.Pesan{Status: false, Message: "Parameter username tidak boleh kosong"})
+		return
+	}
+	if users.Password == "" {
+		c.JSON(http.StatusInternalServerError, models.Pesan{Status: false, Message: "Parameter password tidak boleh kosong"})
+		return
+	}
+	// Cek password
+	row := pconn.QueryRow("SELECT * FROM users WHERE username = $1", users.Username)
+	var spesifikuser models.Users
+	err = row.Scan(&spesifikuser.Username, &spesifikuser.Password, &spesifikuser.Role)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Pesan{Status: false, Message: "Error sql: " + err.Error()})
+		return
+	}
+	hashChecker := helpers.CheckPasswordHash(users.Password, spesifikuser.Password)
+	if !hashChecker {
+		c.JSON(http.StatusInternalServerError, models.Pesan{Status: false, Message: "Password salah"})
+		return
+	}
+	// Encode data login
+	tokenstring, tokenerr := helpers.Encode(spesifikuser.Name, spesifikuser.Username, spesifikuser.Role, os.Getenv("privatekey"))
+	if tokenerr != nil {
+		c.JSON(http.StatusInternalServerError, models.Pesan{Status: false, Message: "Gagal encode token: " + tokenerr.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, models.Pesan{Status: true, Message: "Berhasil login", Token: tokenstring})
+}
+
+func AmbilSemuaUserPostgres(c *gin.Context) {
+	var users []models.Users
+	pconn := utils.SetConnectionPostgres("HOST", "USER", "PASSWORD", "DB_NAME", "PORT", "require")
+	defer pconn.Close()
+	rows, err := pconn.Query("SELECT * FROM users")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.Pesan{Status: false, Message: "Error sql: " + err.Error()})
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var user models.Users
+		err := rows.Scan(&user.Username, &user.Password, &user.Role)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, models.Pesan{Status: false, Message: "Error scanning rows: " + err.Error()})
+			return
+		}
+		users = append(users, user)
+	}
+	c.JSON(http.StatusOK, users)
 }

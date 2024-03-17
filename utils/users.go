@@ -7,37 +7,37 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func InsertUser(mongoenv *mongo.Database, collname string, datauser models.User) (interface{}, error) {
+func InsertUser(mongoenv *mongo.Database, collname string, datauser models.Users) (interface{}, error) {
 	return helpers.InsertOneDoc(mongoenv, collname, datauser)
 }
 
-func GetAllUser(mconn *mongo.Database, collname string) ([]models.User, error) {
-	return helpers.GetAllDoc[models.User](mconn, collname)
+func GetAllUser(mconn *mongo.Database, collname string) ([]models.Users, error) {
+	return helpers.GetAllDoc[models.Users](mconn, collname)
 }
 
-func FindUser(mconn *mongo.Database, collname string, userdata models.User) models.User {
+func FindUser(mconn *mongo.Database, collname string, userdata models.Users) models.Users {
 	filter := bson.M{"username": userdata.Username}
-	return helpers.GetOneDoc[models.User](mconn, collname, filter)
+	return helpers.GetOneDoc[models.Users](mconn, collname, filter)
 }
 
-func IsPasswordValid(mconn *mongo.Database, collname string, userdata models.User) bool {
+func IsPasswordValid(mconn *mongo.Database, collname string, userdata models.Users) bool {
 	filter := bson.M{"username": userdata.Username}
-	res := helpers.GetOneDoc[models.User](mconn, collname, filter)
+	res := helpers.GetOneDoc[models.Users](mconn, collname, filter)
 	hashChecker := helpers.CheckPasswordHash(userdata.Password, res.Password)
 	return hashChecker
 }
 
-func UsernameExists(mconn *mongo.Database, collname string, userdata models.User) bool {
+func UsernameExists(mconn *mongo.Database, collname string, userdata models.Users) bool {
 	filter := bson.M{"username": userdata.Username}
-	return helpers.DocExists[models.User](mconn, collname, filter, userdata)
+	return helpers.DocExists[models.Users](mconn, collname, filter, userdata)
 }
 
-func UpdateUser(mconn *mongo.Database, collname string, datauser models.User) interface{} {
+func UpdateUser(mconn *mongo.Database, collname string, datauser models.Users) interface{} {
 	filter := bson.M{"username": datauser.Username}
 	return helpers.ReplaceOneDoc(mconn, collname, filter, datauser)
 }
 
-func DeleteUser(mconn *mongo.Database, collname string, userdata models.User) interface{} {
+func DeleteUser(mconn *mongo.Database, collname string, userdata models.Users) interface{} {
 	filter := bson.M{"username": userdata.Username}
 	return helpers.DeleteOneDoc(mconn, collname, filter)
 }

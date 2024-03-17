@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func TokenValue(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
+func TokenValueMongo(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		mconn := utils.SetConnection(mongoenv, dbname)
 		var response models.CredentialUser
@@ -22,7 +22,7 @@ func TokenValue(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 		username := c.GetString("username")
 		role := c.GetString("role")
 		// Cek Username
-		if !utils.UsernameExists(mconn, collname, models.User{Username: username}) {
+		if !utils.UsernameExists(mconn, collname, models.Users{Username: username}) {
 			c.JSON(http.StatusInternalServerError, models.Pesan{Status: false, Message: "Akun tidak ditemukan"})
 			c.Abort()
 			return
@@ -36,4 +36,15 @@ func TokenValue(publickey, mongoenv, dbname, collname string) gin.HandlerFunc {
 
 		c.JSON(http.StatusOK, response)
 	}
+}
+
+func SudahLogin(c *gin.Context) {
+	pconn := utils.SetConnectionPostgres("HOST", "USER", "PASSWORD", "DB_NAME", "PORT", "require")
+	defer pconn.Close()
+	// Authorization
+	middleware.Authorization("publickey")(c)
+	if c.IsAborted() {
+		return
+	}
+	c.JSON(http.StatusOK, models.Pesan{Status: true, Message: "Sudah Login"})
 }

@@ -6,10 +6,14 @@ import (
 )
 
 func UserRoutes(incomingRoutes *gin.Engine) {
-	incomingRoutes.GET("/TokenValue", controllers.TokenValue("publickey", "mongoenv", "befous", "user"))
-	incomingRoutes.POST("/Registrasi", controllers.Registrasi("publickey", "mongoenv", "befous", "user"))
-	incomingRoutes.POST("/Login", controllers.Login("privatekey", "mongoenv", "befous", "user"))
-	incomingRoutes.GET("/AmbilSemuaUser", controllers.AmbilSemuaUser("publickey", "mongoenv", "befous", "user"))
-	incomingRoutes.PUT("/EditUser", controllers.EditUser("publickey", "mongoenv", "befous", "user"))
-	incomingRoutes.DELETE("/HapusUser", controllers.HapusUser("publickey", "mongoenv", "befous", "user"))
+	incomingRoutes.GET("/Mongo/TokenValue", controllers.TokenValueMongo("publickey", "mongoenv", "befous", "users"))
+	incomingRoutes.POST("/Mongo/Registrasi", controllers.RegistrasiMongo("publickey", "mongoenv", "befous", "users"))
+	incomingRoutes.POST("/Mongo/Login", controllers.LoginMongo("privatekey", "mongoenv", "befous", "users"))
+	incomingRoutes.GET("/Mongo/AmbilSemuaUser", controllers.AmbilSemuaUserMongo("publickey", "mongoenv", "befous", "users"))
+	incomingRoutes.PUT("/Mongo/EditUser", controllers.EditUserMongo("publickey", "mongoenv", "befous", "userss"))
+	incomingRoutes.DELETE("/Mongo/HapusUser", controllers.HapusUserMongo("publickey", "mongoenv", "befous", "users"))
+	incomingRoutes.GET("/Postgres/SudahLogin", controllers.SudahLogin)
+	incomingRoutes.POST("/Postgres/Registrasi", controllers.RegistrasiPostgres)
+	incomingRoutes.POST("/Postgres/Login", controllers.LoginPostgres)
+	incomingRoutes.GET("/Postgres/AmbilSemuaUser", controllers.AmbilSemuaUserPostgres)
 }
