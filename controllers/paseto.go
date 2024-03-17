@@ -39,7 +39,6 @@ func SudahLogin(c *gin.Context) {
 	// Authorization
 	middleware.Authorization("publickey")(c)
 	if c.IsAborted() {
-		c.JSON(http.StatusUnauthorized, models.Pesan{Status: true, Message: "Belom Login"})
 		return
 	}
 	c.JSON(http.StatusOK, models.Pesan{Status: true, Message: "Sudah Login"})

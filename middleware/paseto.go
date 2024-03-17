@@ -21,7 +21,7 @@ func Authorization(publickey string) gin.HandlerFunc {
 		tokenusername := helpers.DecodeGetUsername(os.Getenv(publickey), header)
 		tokenrole := helpers.DecodeGetRole(os.Getenv(publickey), header)
 		if tokenusername == "" || tokenrole == "" {
-			c.JSON(http.StatusUnauthorized, models.Pesan{Status: false, Message: "Hasil decode tidak ditemukan"})
+			c.JSON(http.StatusUnauthorized, models.Pesan{Status: false, Message: "Belum Login"})
 			c.Abort()
 			return
 		}
