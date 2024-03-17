@@ -26,7 +26,7 @@ func SetConnectionPostgres(host, user, password, dbname, port, ssl string) *sql.
 		Password: os.Getenv(password),
 		DBName:   os.Getenv(dbname),
 		Port:     xxx,
-		SSL:      ssl,
+		SSL:      os.Getenv(ssl),
 	}
 	return helpers.PostgresConnect(DBpostgresinfo)
 }

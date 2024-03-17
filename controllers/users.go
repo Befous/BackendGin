@@ -199,7 +199,7 @@ func HapusUserMongo(publickey, mongoenv, dbname, collname string) gin.HandlerFun
 
 func RegistrasiPostgres(c *gin.Context) {
 	var users models.Users
-	pconn := utils.SetConnectionPostgres("HOST", "USER", "PASSWORD", "DB_NAME", "PORT", "require")
+	pconn := utils.SetConnectionPostgres("HOST", "USER", "PASSWORD", "DB_NAME", "PORT", "SSL")
 	defer pconn.Close()
 	err := c.BindJSON(&users)
 	if err != nil {
@@ -230,7 +230,7 @@ func RegistrasiPostgres(c *gin.Context) {
 
 func LoginPostgres(c *gin.Context) {
 	var users models.Users
-	pconn := utils.SetConnectionPostgres("HOST", "USER", "PASSWORD", "DB_NAME", "PORT", "require")
+	pconn := utils.SetConnectionPostgres("HOST", "USER", "PASSWORD", "DB_NAME", "PORT", "SSL")
 	defer pconn.Close()
 	err := c.BindJSON(&users)
 	if err != nil {
@@ -269,7 +269,7 @@ func LoginPostgres(c *gin.Context) {
 
 func AmbilSemuaUserPostgres(c *gin.Context) {
 	var users []models.Users
-	pconn := utils.SetConnectionPostgres("HOST", "USER", "PASSWORD", "DB_NAME", "PORT", "require")
+	pconn := utils.SetConnectionPostgres("HOST", "USER", "PASSWORD", "DB_NAME", "PORT", "SSL")
 	defer pconn.Close()
 	rows, err := pconn.Query("SELECT * FROM users")
 	if err != nil {
